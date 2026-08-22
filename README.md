@@ -37,7 +37,7 @@ Alternatively, download both, install with MO2 then enable one or the other if y
 
 # Compatibility
 
-If you use dynahud, which comes with compatibility for the cold system ui, AND Cold System Inventory UI, make sure to disable all the cold system the features in Dynahud in MCM otherwise you will have crashes due to conflicts.
+If you use dynahud, which comes with compatibility for the cold system ui, AND Cold System Inventory UI, make sure to disable all the cold system features in Dynahud in MCM otherwise you will have crashes due to conflicts.
 
 ---
 
