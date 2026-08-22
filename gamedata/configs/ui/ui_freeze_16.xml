@@ -68,5 +68,9 @@
         <text x="0" y="0"  align="c" complex_mode="0" font="arial_14" r="230" g="230" b="230" a="230"></text>
     </thermo_text>
 
+	<!-- overlay -->
+	<cold_overlay x="0" y="0" width="1024" height="768" stretch="1">
+    	<texture a="255">ui\freezex\cold_overlay</texture>
+	</cold_overlay>
 
 </window>

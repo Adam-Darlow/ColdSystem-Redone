@@ -542,20 +542,6 @@ function manage_penalties()
 	db.actor.health = hp_regen_koef > 0 and db.actor.health - hp_regen_koef * delta_health or db.actor.health
 	db.actor.health = db.actor.health > health_cap and health_cap or db.actor.health
 
-
--- ppe
-	local mcm_ppe = cold_system_mcm.get_config("ppe")
-	if not (mcm_ppe) then
-		level.remove_pp_effector(573829)
-		return
-	end
-
-	local ppe_power = (1.3 * delta - 0.13) * 0.1		-- 10% start
-	ppe_power = ppe_power > 0 and ppe_power or 0
-
-	level.add_pp_effector("freezex.ppe", 573829, true)
-	level.set_pp_effector_factor(573829, ppe_power)
-
 end
 
 function damage_actor()
