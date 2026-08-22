@@ -1,0 +1,714 @@
+if zz_item_cooking_keep_crafting_window_open then end
+local tmr
+tmr_delta = 0.5
+local tmr_meals
+local meals = {}
+local trader_meals = {}
+local trade_opened = false
+cold = {}
+max_cold = 2000
+max_wind_velocity = 0
+local outfit_mult = 0
+hud_env_temp_blue = 0
+hud_env_temp_red = 0
+hud_prot_temp_offset = 0
+hud_prot_temp = 0
+hud_freeze_step = 0
+local gc = game.translate_string
+local cutils = cold_system_utils
+
+local cold_factors = {
+	["wind"] = {},
+	["rain"] = {},
+	["time"] = {},
+	["sun"] = {},
+	["outfit"] = {},
+	["campfire"] = {},
+	["movement"] = {},
+	["artefact"] = {},
+}
+
+local outfit_kind = {
+	["no_outfit"] = 0,
+	["o_light"] = 0.3,
+	["o_medium"] = 0.6,
+	["o_sci"] = 0.8,
+	["o_heavy"] = 0.9,
+}
+
+local alcohol = {
+	["vodka"] = 0.095,
+	["vodka2"] = 0.085,
+	["vodka_quality"] = 0.09,
+	["bottle_metal"] = 0.098,
+	["tea"] = 0.1,
+}
+
+local medicine = {
+	["akvatab"] = true,
+	["medkit"] = true,
+	["medkit_army"] = true,
+	["medkit_scientic"] = true,
+	["stimpack"] = true,
+	["stimpack_army"] = true,
+	["stimpack_scientic"] = true,
+	["salicidic_acid"] = true,
+	["antibio_sulfad"] = true,
+	["antibio_chlor"] = true,
+	["antiemetic"] = true,
+	["antirad_kalium"] = true,
+}
+
+hot_artefacts = { "af_itcher", "af_pin", "af_cristall", "af_fireball", "af_dummy_glassbeads", "af_eye", "af_fire", "af_lobster_eyes" }
+cold_artefacts = { "af_electra_sparkler", "af_sponge", "af_ring", "af_electra_flash", "af_dummy_battery", "af_dummy_dummy", "af_ice", "af_electra_moonlight" }
+
+hides = {
+	["hide_chimera"] = true,
+	["hide_pseudogiant"] = true,
+	["hide_psy_dog"] = true,
+	["hide_pseudodog"] = true,
+	["hide_burer"] = true,
+	["hide_controller"] = true,
+	["hide_bloodsucker"] = true,
+	["hide_psysucker"] = true,
+	["hide_lurker"] = true,
+	["hide_boar"] = true,
+	["hide_flesh"] = true,
+}
+
+local compatibility_t = {
+    ["i_arty"] = true,
+    ["i_arty_cont"] = true,
+    ["i_arty_junk"] = true,
+    ["i_attach"] = true,
+    ["i_mutant_belt"] = true,
+}
+
+----------------------------------------------------------
+----------------------- freeze funcs xd -------------------
+----------------------------------------------------------
+
+--------------------- init ---------------------
+function save_state(m_data)
+	m_data.meals = meals
+    m_data.cold = cold
+end
+
+function load_state(m_data)
+	meals = m_data.meals or {}
+    cold = m_data.cold or {}
+end
+
+function actor_on_first_update()
+	if not (cold.val) then cold.val = 0 end
+	if not (cold.sickness) then cold.sickness = 0 end
+
+	-- get config names then iterate each section and set max wind velocity
+	max_wind_velocity = cutils.get_max_wind()
+	pr("max_wind_velocity: [ %s ]", max_wind_velocity)
+
+	-- first outfit check
+	outfit_check()
+end
+
+--------------------- outfit ---------------------
+function slot_in_out(obj)
+	if not IsOutfit(obj) then return end
+	local outfit = db.actor:item_in_slot(7)
+	local kind = outfit and ini_sys:r_string_ex(outfit:section(), "kind") or nil
+	outfit_mult = kind and outfit_kind[kind] or outfit_kind["no_outfit"]
+end
+
+function outfit_check()
+	local outfit = db.actor:item_in_slot(7)
+	local no_outfit_val = outfit_kind["no_outfit"]
+	if not (outfit) then
+		outfit_mult = no_outfit_val
+	else
+		for i = 1, 13 do
+			local obj = db.actor:item_in_slot(i)
+			slot_in_out(obj)
+		end
+	end
+
+end
+
+
+----------------------------------------------------------
+---------------------- misc ------------------------------
+----------------------------------------------------------
+
+------------------- water step and fire anomalies ------------------
+function actor_on_footstep(mat)
+	if string.find(mat, "water") then
+		cold.val = cold.val + 3
+	end
+end
+
+function actor_on_before_hit(s_hit)
+	local draftsman = s_hit.draftsman
+	if not (draftsman and IsAnomaly(draftsman)) then return end
+	if s_hit.type ~= 10 then return end
+
+	cold.val = cold.val - s_hit.power * 500
+	cold.val = cold.val > 0 and cold.val or 0
+end
+
+--------------------- sleep ---------------------
+function actor_on_sleep(hours)
+	local mcm_sleep = cold_system_mcm.get_config("sleep")
+	local sleep_mult = db.actor:object("beadspread") and 150 or 100
+	local sleep_cold_reduction = sleep_mult * hours * mcm_sleep
+	cold.val = cold.val - sleep_cold_reduction
+	cold.val = cold.val > 0 and cold.val or 0
+
+	cold.sickness = cold.sickness - hours
+	cold.sickness = cold.sickness > 0 and cold.sickness or 0
+end
+
+--------------------- consumables ---------------------
+-- cook
+local cook = item_cooking.UICook.OnCook
+local max_food_warmth = 1000
+
+function item_cooking.UICook:OnCook()
+	local meal = self:GetSelectedMeal()
+	if (not meal) then
+		return
+	end
+
+	cook(self)
+
+	if meal.sec then
+		CreateTimeEvent("cold_cook_ev", "cold_cook_act", 0.3, make_food_hot, meal.sec)
+		pr("- last cooked meal: [ %s ]", meal.sec)
+	end
+
+end
+
+function make_food_hot(meal_sec)
+	db.actor:iterate_inventory( function(actor, item)
+		if meal_sec and item:section() == meal_sec and not (meals[item:id()]) then
+			meals[item:id()] = max_food_warmth		-- set warmth value
+			return true
+		end
+	end)
+
+	return true
+end
+
+function manage_meal_table()
+	local tg = time_global()
+	if (tmr_meals and tg < tmr_meals) then return end
+	tmr_meals = tg + 10000
+
+	pr("-------- Food table ----------")
+	local cooling_down_rate = 3
+	local mcm_food_cooling = cold_system_mcm.get_config("food_cooling")
+	for id, value in pairs(meals) do
+		meals[id] = value - cooling_down_rate * mcm_food_cooling		-- default: 	very hot = 16 mins; 	hot = 33 mins; 	warm = 55 mins
+
+		local sim = alife()
+		local se_obj = alife_object(id)
+		if (meals[id] <= 0) or not (se_obj) then
+			meals[id] = nil
+		end
+		pr("food id: [ %s ] || warmth: [ %s ]", id, value)
+	end
+
+	pr("-------- Traders food ----------")
+	for id, value in pairs(trader_meals) do
+		pr("trade food id: [ %s ] || warmth: [ %s ]", id, value)
+	end
+
+end
+
+function ui_inventory.UIInventory:Picker_Toggle(bag, idx, update_mode, force_hide)
+	
+--	if (not enable_item_picker) then
+--		return
+--	end
+	
+	if force_hide then
+		self:Picker_Update(true)
+		return
+	end
+	
+	-- This is needed to avoid resetting picker when we click on item property
+	-- (300 ms should be fine because low time scope might not be enough)
+	local no_hide = self.item_props.action_moment and (time_continual() < self.item_props.action_moment + 300)
+	
+	-- Avoid hiding picker if we are scrolling a pad
+	for bag,cc in pairs(self.CC) do
+		if cc:IsShown() and cc.pad:IsShown() and cc.pad:IsCursorOverWindow() then
+			no_hide = true
+			break
+		end
+	end
+	
+	local cc = self.CC["picker"]
+	
+	if (update_mode) then
+		if (not cc:IsShown()) then
+			return
+		end
+		
+		bag = cc.parent.bag
+		idx = cc.parent.idx
+		if not (bag and idx) then
+			return
+		end
+		
+		no_hide = true
+	else
+		if no_hide then
+			self:Print(nil, "Picker_Toggle(%s, %s) | clicked item property -> continue", bag, idx)
+			return
+		end
+		
+		-- Interacting with picker: hide if clicking outside
+		if cc:IsShown() then
+			if cc:IsCursorOverWindow() then
+				self:Print(nil, "Picker_Toggle(%s, %s) | dealing with picker -> continue", bag, idx)
+				return
+
+			elseif (cc.hold.ico:IsShown()) then
+				self:Print(nil, "Picker_Toggle(%s, %s) | was holding cell -> continue", bag, idx)
+				return
+			else
+				self:Print(nil, "Picker_Toggle(%s, %s) | clicking outside picker area -> hide", bag, idx)
+				self:Picker_Update(true)
+				return
+			end
+		end
+		
+		-- Nothing to interact with
+		if not (bag and idx) then
+			self:Print(nil, "Picker_Toggle(%s, %s) | nothing to deal with -> hide", bag, idx)
+			self:Picker_Update(true)
+			return
+		end
+
+		-- Interacting with picker cell
+		if (bag == "picker") then
+			self:Print(nil, "Picker_Toggle(%s, %s) | dealing with picker -> continue", bag, idx)
+			return
+		end
+	end
+	
+	-- Interacting with cell 
+	local ci = self.CC[bag].cell[idx]
+	if not (ci and ci:HasChild() and ( cc:IsCursorOverWindow() or ci:IsCursorOverWindow() or no_hide )) then
+		self:Print(nil, "Picker_Toggle(%s, %s) | cell has no childs or not focused-> hide", bag, idx)
+		self:Picker_Update(true)
+		return
+	end
+	
+	local obj = level.object_by_id(ci.ID)
+	if (not obj) then
+		self:Print(nil, "Picker_Toggle(%s, %s) | cell has no object -> hide", bag, idx)
+		self:Picker_Update(true)
+		return
+	end
+	
+	-- cold system meals
+	local meal_kind = SYS_GetParam(0, obj:section(), "kind", nil)
+	local is_cooked_food = meal_kind and meal_kind == "i_mutant_cooked"
+	-- compatibility
+	local stuff_for_comp = meal_kind and compatibility_t[meal_kind]
+	-- No picker for items without condition bar
+	local clsid = obj:clsid()
+	local use_cond = SYS_GetParam(1,ci.section,"use_condition") or IsWeapon(nil,clsid) or IsOutfit(nil,clsid) or IsHeadgear(nil,clsid) or is_cooked_food or stuff_for_comp
+	if not (use_cond or IsAmmo(nil,clsid)) then
+		self:Print(nil, "Picker_Toggle(%s, %s) | cell has no condition -> hide", bag, idx)
+		self:Picker_Update(true)
+		return
+	end
+	
+	-- Prepare picker
+	local t = {}
+	t[#t+1] = obj
+	for id,_ in pairs(ci.childs) do
+		t[#t+1] = level.object_by_id(id)
+	end
+
+	if self.mode == "trade" then
+		cc.trade_profile = dup_table( self.CC[bag].trade_profile )
+	end
+	cc:Reinit(t)
+	cc:Show(true)
+	cc.parent.bag = bag
+	cc.parent.idx = idx
+	
+	-- For closing picker if player clicked M1 in outer areas
+	self.tg_m1 = time_global()
+	
+	self:Print(nil, "Picker_Toggle(%s, %s) | started picker -> stop", bag, idx)
+end
+
+-- traders
+function open_trade(mode)
+	if mode ~= "trade" then return end
+	trade_opened = true
+
+	local npc = mob_trade.GetTalkingNpc()
+	local is_trader = npc and trade_manager.get_trade_profile(npc:id(), "cfg_ltx")
+	if is_trader then
+		npc:iterate_inventory( function(owner, item)
+			local meal_kind = SYS_GetParam(0, item:section(), "kind", nil)
+			local is_cooked_food = meal_kind and meal_kind == "i_mutant_cooked"
+			if is_cooked_food and not trader_meals[item:id()] and not meals[item:id()] then
+				trader_meals[item:id()] = max_food_warmth
+			end
+		end)
+	end
+
+end
+
+function close_trade()
+	if not (trade_opened) then return end
+	trade_opened = false
+	trader_meals = {}
+end
+
+function actor_on_item_buy(item)
+	if trader_meals[item:id()] and not meals[item:id()] then
+		meals[item:id()] = trader_meals[item:id()]
+	end
+end
+
+function ActorMenu_on_trade_started()
+	RegisterScriptCallback("actor_on_item_take", actor_on_item_buy)
+end
+
+function ActorMenu_on_trade_closed()
+	UnregisterScriptCallback("actor_on_item_take", actor_on_item_buy)
+end
+
+-- ui
+BuildHeader = ui_item.build_desc_header
+function ui_item.build_desc_header(obj, sec, str)
+	str = str or gc(ini_sys:r_string_ex(sec, "description"))
+	if (not str) then return "" end
+
+	local _str = ""
+	local obj_id = obj and obj:id()
+
+	-- inventory
+	local mcm_consumables = cold_system_mcm.get_config("consumables")
+	if obj and meals[obj_id] then
+		-- food cold value reduction
+		local satiety = ini_sys:r_float_ex(sec, "eat_satiety") or 0
+		local base_cold_reduce = satiety / 4
+		local very_hot_reduce = base_cold_reduce
+		local hot_reduce = base_cold_reduce * 0.66
+		local warm_reduce = base_cold_reduce * 0.33
+		----------------------------
+		local red_clr = utils_xml.get_color("d_red")
+		local orange_clr = utils_xml.get_color("d_orange")
+		local yellow_clr = utils_xml.get_color("yellow")
+		local stage_very_hot = meals[obj_id] > (max_food_warmth * 0.7)
+		local stage_hot = meals[obj_id] > (max_food_warmth * 0.4)
+		local stage_warm = meals[obj_id] > 0
+		-- very hot
+		if stage_very_hot then
+			_str = red_clr .. gc("st_food_very_hot") .. " (" .. gc("st_cold_cold") .. ": -" .. round_idp(very_hot_reduce * 100 * mcm_consumables, 1) .. "%)" .. "\\n \\n" .. utils_xml.get_color("ui_gray_1")
+			return _str .. BuildHeader(obj, sec, str)
+		-- hot
+		elseif stage_hot then
+			_str = orange_clr .. gc("st_food_hot") .. " (" .. gc("st_cold_cold") .. ": -" .. round_idp(hot_reduce * 100 * mcm_consumables, 1) .. "%)" .. "\\n \\n" .. utils_xml.get_color("ui_gray_1")
+			return _str .. BuildHeader(obj, sec, str)
+		-- warm
+		elseif stage_warm then
+			_str = yellow_clr .. gc("st_food_warm") .. " (" .. gc("st_cold_cold") .. ": -" .. round_idp(warm_reduce * 100 * mcm_consumables, 1) .. "%)" .. "\\n \\n" .. utils_xml.get_color("ui_gray_1")
+			return _str .. BuildHeader(obj, sec, str)
+		-- none, just in case
+		else
+			return BuildHeader(obj, sec, str)
+		end
+	-- traders
+	elseif obj and trader_meals[obj_id] then
+		local satiety = ini_sys:r_float_ex(sec, "eat_satiety") or 0
+		local base_cold_reduce = satiety / 4
+		local very_hot_reduce = base_cold_reduce
+		local red_clr = utils_xml.get_color("d_red")
+		local traders_stage = trader_meals[obj_id] > (max_food_warmth * 0.7)
+		if traders_stage then
+			_str = red_clr .. gc("st_food_very_hot") .. " (" .. gc("st_cold_cold") .. ": -" .. round_idp(very_hot_reduce * 100 * mcm_consumables, 1) .. "%)" .. "\\n \\n" .. utils_xml.get_color("ui_gray_1")
+			return _str .. BuildHeader(obj, sec, str)
+		-- none, just in case
+		else
+			return BuildHeader(obj, sec, str)
+		end
+	-- alcohol
+	elseif obj and alcohol[sec] then
+		local red_clr = utils_xml.get_color("d_red")
+		_str = red_clr .. " (" .. gc("st_cold_cold") .. ": -" .. round_idp(alcohol[sec] * 100 * mcm_consumables, 1) .. "%)" .. "\\n \\n" .. utils_xml.get_color("ui_gray_1")
+		return _str .. BuildHeader(obj, sec, str)
+	-- medicine (sickness)
+	elseif obj and medicine[sec] then
+		local med_cure_val = math.ceil(cutils.get_med_cure_value(sec) * cold_system_mcm.get_config("medicine"))
+		local pink_clr = strformat("%c[%s,%s,%s,%s]", 255, 200, 100, 255)
+		_str = pink_clr .. gc("st_cold_fever") .. ": -" .. med_cure_val .. "%" .. "\\n \\n" .. utils_xml.get_color("ui_gray_1")
+		return _str .. BuildHeader(obj, sec, str)
+	else
+		return BuildHeader(obj, sec, str)
+	end
+
+end
+
+local bags = {actor_bag = true,actor_trade_bag= true, picker=true}
+function tint_functor(cell)
+	if not bags[cell.container.ID] then return end
+	if not meals[cell.ID] then return end
+
+	local stage_very_hot = meals[cell.ID] > (max_food_warmth * 0.7)
+	local stage_hot = meals[cell.ID] > (max_food_warmth * 0.4)
+	local stage_warm = meals[cell.ID] > 0
+
+	if stage_very_hot then
+		return GetARGB(240, 250, 0, 0)
+	elseif stage_hot then
+		return GetARGB(240, 250, 180, 0)
+	elseif stage_warm then
+		return GetARGB(240, 250, 250, 0)
+	end
+
+end
+
+function actor_on_item_use(item)
+	local mcm_consumables = cold_system_mcm.get_config("consumables")
+
+	local sec = item:section()
+	local id = item:id()
+	-- alcohol
+	if sec and alcohol[sec] then
+		local alcohol_cold_reduction = max_cold * alcohol[sec] * mcm_consumables
+		cold.val = cold.val - alcohol_cold_reduction
+	end
+
+	-- food
+	local stage_very_hot = max_food_warmth * 0.7
+	local stage_hot = max_food_warmth * 0.4
+	if meals[id] then
+		local satiety = ini_sys:r_float_ex(sec, "eat_satiety") or 0
+		local base_cold_reduce = satiety / 4
+		local very_hot_reduce = base_cold_reduce
+		local hot_reduce = base_cold_reduce * 0.66
+		local warm_reduce = base_cold_reduce * 0.33
+
+		if meals[id] > stage_very_hot then
+			cold.val = cold.val - max_cold * very_hot_reduce * mcm_consumables
+		elseif meals[id] > stage_hot then
+			cold.val = cold.val - max_cold * hot_reduce * mcm_consumables
+		else
+			cold.val = cold.val - max_cold * warm_reduce * mcm_consumables
+		end
+		meals[id] = nil
+	end
+
+	-- medicine (sickness)
+	if medicine[sec] then
+		local mcm_medicine = cold_system_mcm.get_config("medicine")
+		local med_cure_val = cutils.get_med_cure_value(sec)
+		cold.sickness = cold.sickness - med_cure_val * mcm_medicine
+	end
+
+	cold.val = cold.val > 0 and cold.val or 0
+	cold.sickness = cold.sickness > 0 and cold.sickness or 0
+
+end
+
+----------------------------------------------------------
+----------------------- penalties -------------------------
+----------------------------------------------------------
+function add_sickness()
+	local cold_delta = cold.val / max_cold
+	if cold_delta < 0.3 then return end
+	local mcm_sickness = cold_system_mcm.get_config("sickness")
+
+	local base_chance = 0.1 * tmr_delta * mcm_sickness * cold_delta		-- 33 mins - 10 mins
+
+	if base_chance > math.random() then
+		cold.sickness = cold.sickness + 1
+	end
+
+	cold.sickness = cold.sickness > 100 and 100 or cold.sickness
+
+end
+
+function manage_penalties()
+	local delta = cold.val / max_cold
+	local stamina_cap = 1
+	local hp_regen_koef = 0
+	local health_cap = 1
+	local satiety = db.actor.satiety
+	local satiety_critical = ini_sys:r_float_ex("actor_condition", "satiety_critical")
+	local satiety_health_v = ini_sys:r_float_ex("actor_condition", "satiety_health_v")
+
+	local critical_something = db.actor.satiety >= satiety_critical and 1 - satiety_critical or satiety_critical
+	local satiety_health_koef = (db.actor.satiety - satiety_critical) / critical_something
+	local delta_health = satiety_health_v * satiety_health_koef * 6 * tmr_delta		-- hp regen according to engine (per our 0.5 irl sec update)
+
+	if cold.sickness >= 10 then
+		stamina_cap = -0.004 * cold.sickness + 1
+		hp_regen_koef = 0.01 * cold.sickness
+		health_cap = -0.0025 * cold.sickness + 1
+	end
+
+	pr("~sickness: [ %s ]", cold.sickness)
+	db.actor.power = db.actor.power > stamina_cap and stamina_cap or db.actor.power
+	db.actor.health = hp_regen_koef > 0 and db.actor.health - hp_regen_koef * delta_health or db.actor.health
+	db.actor.health = db.actor.health > health_cap and health_cap or db.actor.health
+
+
+-- ppe
+	local mcm_ppe = cold_system_mcm.get_config("ppe")
+	if not (mcm_ppe) then
+		level.remove_pp_effector(573829)
+		return
+	end
+
+	local ppe_power = (1.3 * delta - 0.13) * 0.1		-- 10% start
+	ppe_power = ppe_power > 0 and ppe_power or 0
+
+	level.add_pp_effector("freezex.ppe", 573829, true)
+	level.set_pp_effector_factor(573829, ppe_power)
+
+end
+
+function damage_actor()
+	local delta = cold.val / max_cold
+	if delta < 0.9 then return end
+
+	local hit_power = delta * 0.00166 * tmr_delta		-- max delta 10% per irl min	(0.00166 per sec)
+	db.actor.health = db.actor.health - hit_power
+
+end
+
+function speed_slow()
+	local delta = cold.val / max_cold
+	local speed_reduction = -0.25 * delta + 1											-- delta: 0, 1 = speed: 1, 0.75
+	local run_coef = (-0.007 * cold.sickness + 1) * speed_reduction			-- sickness: 0, 50, 100 = speed: 1, 0.65, 0.3
+	speed.add_speed("freeze_speed_run", run_coef, false, true)
+
+	if not (cold_system_mcm.get_config("debugx")) then return end
+	local vec = db.actor:get_movement_speed()
+	local ms = (vec.x)^2 + (vec.y)^2 + (vec.z)^2
+	if ms <= 0 then return end
+	news_manager.send_tip(db.actor, string.format("Move Speed: [ %s ]", r(ms)), 0, nil, 1500)
+end
+
+----------------------------------------------------------
+---------------------- calc ------------------------------
+----------------------------------------------------------
+function calc_freeze()
+	-- negative
+	cold_factors["wind"].base = cutils.calc_wind()						-- winter (0; 2], others (0; 1]
+	cold_factors["rain"].base = cutils.calc_rain()							-- [0; 1]
+	cold_factors["time"].base = cutils.calc_time()						-- winter [0.5; 2], others [0; 0.75]
+	-- positive
+	cold_factors["sun"].base = -cutils.calc_sun() 							-- [0.01; 1]
+	cold_factors["outfit"].base = -outfit_mult								-- [0; 0.9]
+	cold_factors["campfire"].base = -cutils.calc_campfire() 			-- [0; 3]
+	cold_factors["movement"].base = -cutils.calc_movement() 	-- [0; 0.75]
+	cold_factors["artefact"].base = -cutils.calc_artefacts()			-- [-1; 1]
+
+-- add mcm
+	for name, _ in pairs(cold_factors) do
+		cold_factors[name].new = cold_factors[name].mcm > 0 and cold_factors[name].base * cold_factors[name].mcm or 0
+	end
+
+-- calc hud
+	local env_hud = cold_factors["wind"].new + cold_factors["rain"].new + cold_factors["time"].new + cold_factors["sun"].new
+	hud_env_temp_blue = env_hud
+	hud_env_temp_red = -env_hud
+
+	local prot_hud = cold_factors["outfit"].new + cold_factors["campfire"].new + cold_factors["movement"].new + cold_factors["artefact"].new
+--	hud_prot_temp_offset = clamp(math.ceil(13.45 * -(prot_hud)), 0 , 76)			-- 1	=	max (y = +76)	;	0 = min (y = +0)	;	
+	hud_prot_temp_offset = -prot_hud / 5
+	hud_prot_temp = prot_hud
+
+-- calc cold value step
+	local freeze_step = 0
+	for name, _ in pairs(cold_factors) do
+		freeze_step = freeze_step + cold_factors[name].new
+	end
+	hud_freeze_step = freeze_step / tmr_delta
+
+	if (cold_system_mcm.get_config("debugx")) then
+		actor_menu.set_msg(1, strformat("Wind: +%s | Rain: +%s | Time: +%s | Sun: %s | Outfit: %s | Campfire: %s | Move: %s | Attachments: %s || TOTAL: %s", r(cold_factors["wind"].new), r(cold_factors["rain"].new), r(cold_factors["time"].new), r(cold_factors["sun"].new), r(cold_factors["outfit"].new), r(cold_factors["campfire"].new), r(cold_factors["movement"].new), r(cold_factors["artefact"].new), r(freeze_step)))
+	end
+
+	return freeze_step
+end
+
+--------------------------------------------------------------------------------------------------------------------
+function actor_on_update()
+	local tg = time_global()
+	if (tmr and tg < tmr) then return end
+	tmr = tg + 1000 * tmr_delta
+
+	local freeze_step = calc_freeze()
+	cold.val = cold.val + freeze_step
+	cold.val = clamp(cold.val, 0, max_cold)
+
+	manage_meal_table()
+
+	add_sickness()
+	manage_penalties()
+	damage_actor()
+	speed_slow()
+
+	if not (cold_system_mcm.get_config("debugx")) then return end
+	news_manager.send_tip(db.actor, string.format("Cold Value: [ %s ]", r(cold.val)), 0, nil, 1500)
+end
+
+----------------------------------------------------------
+----------------------- misc ------------------------------
+----------------------------------------------------------
+function pr(...)
+	if not (cold_system_mcm.get_config("debugx")) then return end
+	printf(...)
+end
+
+function r(val)
+	return round_idp(val, 2)
+end
+
+function on_option_change()
+	cold_factors["wind"].mcm = cold_system_mcm.get_config("wind")
+	cold_factors["rain"].mcm = cold_system_mcm.get_config("rain")
+	cold_factors["time"].mcm = cold_system_mcm.get_config("time")
+	cold_factors["sun"].mcm = cold_system_mcm.get_config("sun")
+	cold_factors["outfit"].mcm = cold_system_mcm.get_config("outfit")
+	cold_factors["campfire"].mcm = cold_system_mcm.get_config("campfire")
+	cold_factors["movement"].mcm = cold_system_mcm.get_config("move")
+	cold_factors["artefact"].mcm = cold_system_mcm.get_config("artefact")
+
+	if cold_system_hud and cold_system_hud.HUD then
+		cold_system_hud.HUD:Refresh()
+	end
+end
+
+function on_game_start()
+	RegisterScriptCallback("save_state", save_state)
+	RegisterScriptCallback("load_state", load_state)
+	RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
+	RegisterScriptCallback("actor_item_to_slot", slot_in_out)
+	RegisterScriptCallback("actor_item_to_ruck", slot_in_out)
+	RegisterScriptCallback("actor_on_item_drop", slot_in_out)
+	RegisterScriptCallback("actor_on_footstep", actor_on_footstep)
+	RegisterScriptCallback("actor_on_before_hit", actor_on_before_hit)
+	RegisterScriptCallback("actor_on_sleep", actor_on_sleep)
+	RegisterScriptCallback("ActorMenu_on_before_init_mode", open_trade)
+	RegisterScriptCallback("GUI_on_hide", close_trade)
+	RegisterScriptCallback("ActorMenu_on_trade_started", ActorMenu_on_trade_started)
+	RegisterScriptCallback("ActorMenu_on_trade_closed", ActorMenu_on_trade_closed)
+	RegisterScriptCallback("actor_on_item_use", actor_on_item_use)
+	RegisterScriptCallback("actor_on_update", actor_on_update)
+	RegisterScriptCallback("on_option_change", on_option_change)
+
+	on_option_change()
+	rax_icon_tint.register("xcvb_meal_tint", tint_functor)
+end

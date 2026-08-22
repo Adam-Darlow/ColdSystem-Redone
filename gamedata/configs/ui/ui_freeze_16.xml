@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<window>
+
+	<!-- Cold -->
+
+	<cold_bg x="940" y="190" width="75" height="17" stretch="1" >
+			<texture>ui_cold_system_main_background</texture>
+
+		<cold_frame x="1" y="1" width="73" height="10" stretch="1" >
+				<texture>ui_cold_system_cold_frame</texture>
+
+			<cold_bar x="1" y="1" width="71" height="8" min="0" max="1" horz="1" >
+				<progress>
+					<texture>ui_cold_system_cold_bar</texture>
+				</progress>
+			</cold_bar>
+		</cold_frame>
+
+		<sick_threshold x="0" y="0" width="2" height="8" stretch="1" >
+			<texture>ui_cold_system_sick_threshold</texture>
+		</sick_threshold>
+		<damage_threshold x="0" y="0" width="2" height="8" stretch="1" >
+			<texture>ui_cold_system_damage_threshold</texture>
+		</damage_threshold>
+
+		<sick_frame x="3" y="12" width="70" height="4" stretch="1" >
+				<texture>ui_cold_system_sick_frame</texture>
+
+			<sick_bar x="2" y="1" width="66" height="2" min="0" max="100" horz="1" >
+				<progress>
+					<texture>ui_cold_system_sick_bar</texture>
+				</progress>
+			</sick_bar>
+		</sick_frame>
+	</cold_bg>
+
+
+	<!-- Thermometer -->
+
+	<thermo_bg x="990" y="50" width="15" height="130" stretch="1" >
+			<texture>ui_cold_system_thermo_background</texture>
+
+		<blue_bar x="4" y="44" width="7" height="85" min="0" max="5" mode="down">
+			<progress>
+				<texture r="90" g="200" b="230" a="150">ui_cold_system_thermo_blue_bar</texture> 
+			</progress>
+		</blue_bar>
+
+		<red_bar x="4" y="1" width="7" height="42" min="0" max="1">
+			<progress>
+				<texture r="230" g="65" b="60" a="150">ui_cold_system_thermo_red_bar</texture>
+			</progress>
+		</red_bar>
+
+		<resist x="1" y="0" width="13" height="3" stretch="1">
+				<texture r="230" g="200" b="100" a="230">none.dds</texture>
+		</resist>
+	</thermo_bg>
+
+
+	<!-- text -->
+    <cold_text x="955" y="130" width="25" height="25" stretch="1">
+        <text x="0" y="0"  align="c" complex_mode="0" font="arial_14" r="230" g="230" b="230" a="230"></text>
+    </cold_text>
+
+    <thermo_text x="955" y="50" width="25" height="25" stretch="1">
+        <text x="0" y="0"  align="c" complex_mode="0" font="arial_14" r="230" g="230" b="230" a="230"></text>
+    </thermo_text>
+
+
+</window>

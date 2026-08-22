@@ -1,0 +1,102 @@
+-- If you don't use MCM, change your defaults from here.
+local gc = game.translate_string
+local defaults = {
+	["winter"] = true,
+	["wind"] = 1,
+	["rain"] = 1,
+	["time"] = 1,
+	["sun"] = 1,
+	["campfire"] = 1,
+	["move"] = 1,
+	["outfit"] = 1,
+	["artefact"] = 1,
+
+	["hud"] = true,
+	["keybind"] = DIK_keys.DIK_P,
+	["main_hud_position_x"] = 940,
+	["main_hud_position_y"] = 190,
+	["main_bar_text_mode"] = false,
+	["main_hud_font"] = 4,
+	["main_hud_descr_type"] = 2,
+	["thermo_hud_position_x"] = 990,
+	["thermo_hud_position_y"] = 50,
+	["thermo_bar_text_mode"] = false,
+	["thermo_hud_font"] = 4,
+	["thermo_hud_descr_type"] = 1,
+
+	["sickness"] = 1,
+	["medicine"] = 1,
+	["sleep"] = 1,
+	["food_cooling"] = 1,
+	["consumables"] = 1,
+	["ppe"] = true,
+	["debugx"] = false,
+}
+
+local hud_font_table = {
+	{1, "Small"},
+	{2, "Medium"},
+	{3, "DI"},
+	{4, "Letterica 16"},
+	{5, "Letterica 18"},
+	{6, "Letterica 25"},
+	{7, "Graffiti 19"},
+	{8, "Graffiti 22"},
+	{9, "Graffiti 32"},
+	{10, "Graffiti 50"},
+}
+
+function get_config(key)
+	if ui_mcm then return ui_mcm.get("cold_system/"..key) else return defaults[key] end
+end
+
+function on_mcm_load()
+	op = { id= "cold_system",sh=true ,gr={
+			{ id= "title",type= "slide",link= "ui_options_slider_player",text="ui_mcm_cold_system_title",size= {512,50},spacing= 20 },
+
+			{ id= "title"				   ,type= "title"	 ,text= "ui_mcm_cold_system_header_main" 			,align= "l"	,clr= {255,200,200,200}	},
+			{id = "winter", type = "check", val = 1, def = true},
+			{id= "divider", type = "line" },
+			{id = "wind", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "rain", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "time", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "sun", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "campfire", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "move", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "outfit", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "artefact", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+
+			{id= "divider", type = "line" },
+			{ id= "title"				   ,type= "title"	 ,text= "ui_mcm_cold_system_header_hud" 			,align= "l"	,clr= {255,200,200,200}	},
+			{id = "hud", type = "check", val = 1, def = true},
+			{ id= "keybind"	, type = "key_bind", val = 2, def = DIK_keys.DIK_P},
+			
+			{id= "divider", type = "line" },
+			{id = "main_hud_position_x", type = "track", val = 2, min=0,max=1024,step=1, def = 940},
+			{id = "main_hud_position_y", type = "track", val = 2, min=0,max=768,step=1, def = 190},
+			{id = "main_bar_text_mode", type = "check", val = 1, def = false},
+			{ id= "main_hud_font"	,type= "list", val = 2, def = 4, content = hud_font_table, no_str = true},
+			{ id= "main_hud_descr_type"	,type= "list", val = 2, def = 2, content = { {1, gc("cold_main_hud_value")}, {2, gc("cold_main_hud_percent")} }, no_str = true},
+
+			{id= "divider", type = "line" },
+			{id = "thermo_hud_position_x", type = "track", val = 2, min=0,max=1024,step=1, def = 990},
+			{id = "thermo_hud_position_y", type = "track", val = 2, min=0,max=768,step=1, def = 50},
+			{id = "thermo_bar_text_mode", type = "check", val = 1, def = false},
+			{ id= "thermo_hud_font"	,type= "list", val = 2, def = 4, content = hud_font_table, no_str = true},
+			{ id= "thermo_hud_descr_type"	,type= "list", val = 2, def = 1, content = { {1, gc("cold_thermo_hud_short")}, {2, gc("cold_thermo_hud_long")} }, no_str = true},
+
+			{id= "divider", type = "line" },
+			{ id= "title"				   ,type= "title"	 ,text= "ui_mcm_cold_system_header_misc" 			,align= "l"	,clr= {255,200,200,200}	},
+
+			{id = "sickness", type = "track", val = 2, min=0.05,max=5,step=0.05, def = 1},
+			{id = "medicine", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "sleep", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "food_cooling", type = "track", val = 2, min=0.05,max=5,step=0.05, def = 1},
+			{id = "consumables", type = "track", val = 2, min=0,max=5,step=0.05, def = 1},
+			{id = "ppe", type = "check", val = 1, def = true},
+			{id = "debugx", type = "check", val = 1, def = false},
+		}
+	}
+
+	return op
+end

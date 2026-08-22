@@ -1,0 +1,266 @@
+local cmain = cold_system
+local gc = game.translate_string
+
+----------------------- for wind ------------------------------
+function get_max_wind()
+	local max_wind_velocity = 0
+
+	local folder = getFS():file_list_open("$game_weathers$", 1)
+	local folder_size = folder:Size()
+	for i = 1, folder_size - 1 do
+		local file = folder:GetAt(i)
+		local wthr_ini = ini_file_ex("environment\\weathers\\" .. tostring(file) .. "").ini
+		wthr_ini:section_for_each(function(section)
+			local wind_val = wthr_ini:r_float_ex(section, "wind_velocity") or 0
+			if wind_val > max_wind_velocity then
+				max_wind_velocity = wind_val
+			end
+		end)
+	end
+
+	return max_wind_velocity
+end
+
+----------------------- for rain ------------------------------
+function ray_main(add_x, add_y, add_z, range, dir_x, dir_y, dir_z)
+	local pick = ray_pick()
+	local cam_pos = vector():set(device().cam_pos)
+	local box_pos = vector():set(add_x, add_y, add_z)
+	local pos = cam_pos:add(box_pos)
+	pick:set_position(pos)
+	pick:set_direction(vector():set(dir_x, dir_y, dir_z))
+	pick:set_flags(2)
+	pick:set_range(range)
+	pick:query()
+	local distance = pick:get_distance()
+
+	return distance > 0 or nil
+end
+
+function actor_rain_indoors()
+	local hitbox = 0.6
+	local range = 200
+
+	local rain_t = {}
+	rain_t[1] = ray_main(0, 0, 0, range, 0, 0.5, 0)
+	rain_t[2] = ray_main(hitbox, 0, 0, range, 0, 0.5, 0)
+	rain_t[3] = ray_main(-hitbox, 0, 0, range, 0, 0.5, 0)
+	rain_t[4] = ray_main(0, 0, hitbox, range, 0, 0.5, 0)
+	rain_t[5] = ray_main(0, 0, -hitbox, range, 0, 0.5, 0)
+
+	return size_table(rain_t) >= 3
+end
+
+----------------------- for time ------------------------------
+function calc_winter_time()
+	local winter_time
+	local hours = level.get_time_hours() + level.get_time_minutes() / 60
+	local min_period = (hours >= 12 and hours <= 14) and 0.25 or nil
+	local max_period = (hours >= 23 or hours <= 4) and 1 or nil
+
+	if hours > 4 and hours < 12 then
+		winter_time = -0.1036 * hours + 1.44
+	elseif hours > 14 and hours < 23 then
+		winter_time = 0.0816 * hours - 0.897
+	else
+		winter_time = min_period or max_period or 0.25
+	end
+
+	return winter_time * 2
+end
+
+function calc_summer_time()
+	local summer_time
+	local hours = level.get_time_hours() + level.get_time_minutes() / 60
+	local min_period = (hours >= 11 and hours <= 16) and 0 or nil
+	local max_period = (hours >= 1 and hours <= 3) and 0.75 or nil
+
+	if hours >= 0 and hours < 1 then
+		hours = hours + 24
+	end
+
+	if hours > 3 and hours < 11 then
+		summer_time = -0.09 * hours + 1.02
+	elseif hours > 16 and hours < 25 then
+		summer_time = 0.0816 * hours - 1.311
+	else
+		summer_time = min_period or max_period or 0
+	end
+
+	return summer_time
+end
+
+----------------------- calc stuff ------------------------------
+function calc_wind()
+	if GetEvent("current_safe_cover") then return 0 end
+
+	local mcm_winter = cold_system_mcm.get_config("winter")
+	local winter_mult = mcm_winter and 2 or 1
+	local wind_velocity = weather.get_value_numric("wind_velocity") or 0
+	wind_velocity = clamp(wind_velocity, 1, cmain.max_wind_velocity)
+	local wind_mult = (wind_velocity / cmain.max_wind_velocity)
+	wind_mult = wind_mult * winter_mult
+
+	return wind_mult
+end
+
+function calc_rain()
+	local rain_density = weather.get_value_numric("rain_density") or 0
+	if rain_density <= 0 then return 0 end
+	if actor_rain_indoors() then return 0 end
+
+	return rain_density
+end
+
+function calc_time()
+	local mcm_winter = cold_system_mcm.get_config("winter")
+	local time_mult = mcm_winter and calc_winter_time() or calc_summer_time()
+
+	return time_mult
+end
+
+function calc_sun()
+	local hours = level.get_time_hours()
+	local is_night = hours < 5 or hours >= 22
+	if is_night then return 0 end
+
+	local sun_color = weather.get_value_vector("sun_color") or 0.01
+	sun_color = (sun_color.x + sun_color.y + sun_color.z) / 3
+	local sun_mult = clamp(sun_color, 0.01, 0.99)
+
+	if GetEvent("current_safe_cover") then
+		sun_mult = sun_mult / 2
+	end
+
+	return sun_mult
+end
+
+function calc_campfire()
+	local dist = 10
+	local pos = db.actor:position()
+	for id,binder in pairs(bind_campfire.campfires_all) do
+		if (binder and binder.campfire and binder.campfire:is_on()) then
+			if (pos:distance_to_sqr(binder.object:position()) <= dist) then
+				return 3
+			end
+		end
+	end
+	return 0
+end
+
+function calc_movement()
+	-- sprint
+	if IsMoveState('mcSprint') then
+		return 0.75
+	end
+
+	-- jog
+	local move_state = level.actor_moving_state()
+	if (move_state <= 26) and (move_state >= 1) then
+		return 0.3
+	end
+
+	-- walk
+	if IsMoveState('mcAccel') then
+		return 0.15
+	end
+
+	return 0
+end
+
+function calc_artefacts()
+	local arte_mult = 0
+	db.actor:iterate_belt( function(owner, item)
+		local sec = item:section()
+
+		if sec and cmain.hides[sec] then
+			local tier = ini_sys:r_float_ex(sec, "tier") or 1
+			arte_mult = arte_mult + tier
+		end
+
+		for i = 1, #cmain.cold_artefacts do
+			if sec and string.find(sec, cmain.cold_artefacts[i]) then
+				local tier = ini_sys:r_float_ex(cmain.cold_artefacts[i], "tier") or 1
+				arte_mult = arte_mult - tier
+			end
+		end
+
+		for i = 1, #cmain.hot_artefacts do
+			if sec and string.find(sec, cmain.hot_artefacts[i]) then
+				local tier = ini_sys:r_float_ex(cmain.hot_artefacts[i], "tier") or 1
+				arte_mult = arte_mult + tier
+			end
+		end
+
+	end)
+
+	arte_mult = arte_mult * 0.05
+
+	return arte_mult
+end
+
+--------------------- medicine ---------------------------------------
+function get_med_cure_value(sec)
+	local cost = ini_sys:r_float_ex(sec, "cost") or 0
+	local max_use = ini_sys:r_float_ex(sec, "max_uses") or 1
+	local tier = ini_sys:r_float_ex(sec, "tier") or 1
+
+	local cure_val = math.floor(cost / max_use * 0.001 * tier + 0.5)
+
+	if sec == "stimpack_army" or sec == "stimpack_scientic" then
+		cure_val = cure_val * 0.5
+	end
+
+	return cure_val
+end
+
+------------------------ for HUD ------------------------------------
+local hud_font_table = {
+	[1] = GetFontSmall(),  [2] = GetFontMedium(),  [3] = GetFontDI(),  [4] = GetFontLetterica16Russian(),
+	[5] = GetFontLetterica18Russian(),  [6] = GetFontLetterica25(),  [7] = GetFontGraffiti19Russian(),
+	[8] = GetFontGraffiti22Russian(),  [9] = GetFontGraffiti32Russian(),  [10] = GetFontGraffiti50Russian(),
+}
+
+function get_hud_cold_font()
+	local mcm_font = cold_system_mcm.get_config("main_hud_font")
+	local font
+	for id, func in pairs(hud_font_table) do
+		if id == mcm_font then
+			font = func
+		end
+	end
+
+	return font
+end
+
+function get_hud_cold_str()
+	local str_val = tostring(r(cmain.cold.val) .. " / " .. cmain.max_cold) .. " (" .. gc("cold_main_sickness_val") .. " " .. tostring(math.floor(cmain.cold.sickness + 0.5)) .. "%)"
+	local str_perc = tostring(math.floor( (cmain.cold.val / cmain.max_cold) * 100 + 0.5)) .. "%" .. " (" .. gc("cold_main_sickness_val") .. " " .. tostring(math.floor(cmain.cold.sickness + 0.5)) .. "%)"
+	local main_string_type_mcm = cold_system_mcm.get_config("main_hud_descr_type")
+	local text_str = (main_string_type_mcm == 1 and str_val) or (main_string_type_mcm == 2 and str_perc) or ""
+	return text_str
+end
+
+function get_hud_thermo_font()
+	local mcm_font = cold_system_mcm.get_config("thermo_hud_font")
+	local font
+	for id, func in pairs(hud_font_table) do
+		if id == mcm_font then
+			font = func
+		end
+	end
+
+	return font
+end
+
+function get_hud_thermo_str()
+	local thermo_str_short = gc("cold_thermo_short_str") .. " " .. tostring(r(cmain.hud_freeze_step))
+	local thermo_str_long = gc("cold_thermo_long_env") .. " " .. tostring(r(cmain.hud_env_temp_blue)) .. "  " .. gc("cold_thermo_long_prot") .. " " .. tostring(r(cmain.hud_prot_temp)) .. "  " .. gc("cold_thermo_long_tot") .. " " .. tostring(r(cmain.hud_freeze_step * cmain.tmr_delta))
+	local thermo_string_type_mcm = cold_system_mcm.get_config("thermo_hud_descr_type")
+	local text_str = (thermo_string_type_mcm == 1 and thermo_str_short) or (thermo_string_type_mcm == 2 and thermo_str_long) or ""
+	return text_str
+end
+
+function r(val)
+	return round_idp(val, 2)
+end
