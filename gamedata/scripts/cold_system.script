@@ -457,25 +457,6 @@ function ui_item.build_desc_header(obj, sec, str)
 
 end
 
-local bags = {actor_bag = true,actor_trade_bag= true, picker=true}
-function tint_functor(cell)
-	if not bags[cell.container.ID] then return end
-	if not meals[cell.ID] then return end
-
-	local stage_very_hot = meals[cell.ID] > (max_food_warmth * 0.7)
-	local stage_hot = meals[cell.ID] > (max_food_warmth * 0.4)
-	local stage_warm = meals[cell.ID] > 0
-
-	if stage_very_hot then
-		return GetARGB(240, 250, 0, 0)
-	elseif stage_hot then
-		return GetARGB(240, 250, 180, 0)
-	elseif stage_warm then
-		return GetARGB(240, 250, 250, 0)
-	end
-
-end
-
 function actor_on_item_use(item)
 	local mcm_consumables = cold_system_mcm.get_config("consumables")
 
