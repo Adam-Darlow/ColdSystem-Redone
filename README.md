@@ -138,6 +138,6 @@ Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/fx
 
 # Disclaimer
 
-I am not an expert coder in lua scripts. I used ChatGPT to help edit the scripts and write new scripts for the purposes of this mod. The other features such as config edits and textures where done by me and wesmontomato for the frost texture.
+I am not an expert coder in lua scripts. I used ChatGPT to help write and edit the scripts for the purposes of this mod. The other features such as config edits and textures where done by me and wesmontomato for the frost texture.
 
 ---
