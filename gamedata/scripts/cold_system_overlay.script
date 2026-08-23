@@ -43,6 +43,11 @@ function update_cold_overlay()
 		return
 	end
 
+	if not cold_system_mcm.get_config("ppe") then
+		COLD_OVERLAY_WND:Show(false)
+		return
+	end
+
 	if not cmain or not cmain.cold or not cmain.cold.val then
 		return
 	end
