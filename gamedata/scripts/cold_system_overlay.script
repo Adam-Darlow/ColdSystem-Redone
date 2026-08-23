@@ -1,0 +1,118 @@
+local cmain = cold_system
+
+local COLD_OVERLAY = nil
+local COLD_OVERLAY_WND = nil
+local overlay_tmr = 0
+
+function activate_cold_overlay()
+	printf("COLD OVERLAY: activate_cold_overlay() CALLED")
+
+	local hud = get_hud()
+
+	if hud == nil then
+		printf("COLD OVERLAY: get_hud() FAILED")
+		return
+	end
+
+	printf("COLD OVERLAY: get_hud() SUCCESS")
+
+	hud:AddCustomStatic("cold_overlay")
+
+	printf("COLD OVERLAY: AddCustomStatic() CALLED")
+
+	COLD_OVERLAY = hud:GetCustomStatic("cold_overlay")
+
+	if COLD_OVERLAY == nil then
+		printf("COLD OVERLAY: GetCustomStatic() FAILED")
+		return
+	end
+
+	printf("COLD OVERLAY: GetCustomStatic() SUCCESS")
+
+	COLD_OVERLAY_WND = COLD_OVERLAY:wnd()
+
+	if COLD_OVERLAY_WND == nil then
+		printf("COLD OVERLAY: wnd() FAILED")
+		return
+	end
+
+	printf("COLD OVERLAY: wnd() SUCCESS")
+
+	COLD_OVERLAY_WND:Show(false)
+
+	printf("COLD OVERLAY: Show(false) CALLED")
+end
+
+function update_cold_overlay()
+	local tg = time_global()
+
+	if overlay_tmr > tg then
+		return
+	end
+
+	overlay_tmr = tg + 500
+
+	printf("COLD OVERLAY: update_cold_overlay() CALLED")
+
+	if COLD_OVERLAY_WND == nil then
+		printf("COLD OVERLAY: COLD_OVERLAY_WND is nil")
+		return
+	end
+
+	if not cmain or not cmain.cold or not cmain.cold.val then
+		printf("COLD OVERLAY: cmain.cold.val unavailable")
+		return
+	end
+
+	local delta = cmain.cold.val / cmain.max_cold
+
+	local overlay_power = (delta - 0.25) / 0.55
+	overlay_power = clamp(overlay_power, 0, 1)
+
+	overlay_power = overlay_power ^ 1.5
+
+	if overlay_power <= 0 then
+		COLD_OVERLAY_WND:Show(false)
+		return
+	end
+
+	COLD_OVERLAY_WND:Show(true)
+
+	local alpha = math.floor(overlay_power * 255)
+	local clr = GetARGB(alpha, 255, 255, 255)
+
+	COLD_OVERLAY_WND:SetTextureColor(clr)
+
+	printf(
+		"COLD OVERLAY: cold.val = %s | delta = %s | power = %s | alpha = %s",
+		cmain.cold.val,
+		delta,
+		overlay_power,
+		alpha
+	)
+end
+
+function deactivate_cold_overlay()
+	printf("COLD OVERLAY: deactivate_cold_overlay() CALLED")
+
+	local hud = get_hud()
+
+	if hud and COLD_OVERLAY then
+		hud:RemoveCustomStatic("cold_overlay")
+		printf("COLD OVERLAY: RemoveCustomStatic() CALLED")
+	end
+
+	COLD_OVERLAY = nil
+	COLD_OVERLAY_WND = nil
+end
+
+function on_game_start()
+	printf("COLD OVERLAY: on_game_start() CALLED")
+
+	RegisterScriptCallback("actor_on_first_update", activate_cold_overlay)
+	RegisterScriptCallback("actor_on_update", update_cold_overlay)
+	RegisterScriptCallback("actor_on_net_destroy", deactivate_cold_overlay)
+	RegisterScriptCallback("actor_on_before_death", deactivate_cold_overlay)
+
+	printf("COLD OVERLAY: callbacks registered")
+end

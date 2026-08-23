@@ -62,7 +62,6 @@ function ColdSystemHUD:InitControls()
 	-- texts
 	self.cold_text = xml:InitStatic("cold_text", self)
 	self.thermo_text = xml:InitStatic("thermo_text", self)
-	self.cold_overlay = xml:InitStatic("cold_overlay", self)
 end
 
 function ColdSystemHUD:Update()
@@ -74,7 +73,6 @@ function ColdSystemHUD:Update()
 
 	self:ColdUpdate()
 	self:ThermoUpdate()
-	self:ColdOverlayUpdate()
 
 	-- hide all and show based on conditions
 	self:HideAll()
@@ -110,35 +108,6 @@ function ColdSystemHUD:ThermoUpdate()
 	local thermo_resist_x = self.thermo_resist:GetWndPos().x
 	local thermo_resist_y = clamp(self.blue_bar_y + cmain.hud_prot_temp_offset * self.blue_bar_h, 0, self.blue_bar_h)
 	self.thermo_resist:SetWndPos(vector2():set(thermo_resist_x, thermo_resist_y))
-end
-
-function ColdSystemHUD:ColdOverlayUpdate()
-	local mcm_ppe = cold_system_mcm.get_config("ppe")
-
-	if not mcm_ppe then
-		self.cold_overlay:Show(false)
-		return
-	end
-
-	local delta = cmain.cold.val / cmain.max_cold
-
-	-- No overlay until 40% cold.
-	local overlay_power = (delta - 0.25) / 0.55
-	overlay_power = clamp(overlay_power, 0, 1)
-
-	overlay_power = overlay_power ^ 1.5
-
-	if overlay_power <= 0 then
-		self.cold_overlay:Show(false)
-		return
-	end
-
-	self.cold_overlay:Show(true)
-
-	local alpha = math.floor(overlay_power * 255)
-	local clr = GetARGB(alpha, 255, 255, 255)
-
-	self.cold_overlay:SetTextureColor(clr)
 end
 
 function ColdSystemHUD:Refresh()

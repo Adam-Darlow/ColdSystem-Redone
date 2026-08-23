@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<window>
+
+    <cold_overlay x="0" y="0" width="1024" height="768" stretch="1">
+        <texture a="255">ui\freezex\cold_overlay</texture>
+    </cold_overlay>
+
+</window>
