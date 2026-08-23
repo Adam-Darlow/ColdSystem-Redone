@@ -54,7 +54,7 @@ function update_cold_overlay()
 
 	local delta = cmain.cold.val / cmain.max_cold
 
-	local overlay_power = (delta - 0.10) / 0.70
+	local overlay_power = (delta - 0.7) / 0.73
 	overlay_power = clamp(overlay_power, 0, 1)
 
 	overlay_power = overlay_power ^ 1.5
