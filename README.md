@@ -52,3 +52,9 @@ Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
 Frosted Winter Mask Overlay mod by wesmontomato
 
 Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/fx
+
+# Disclaimer
+
+I am not an expert coder in lua scripts. I used ChatGPT to help edit the scripts for the purposes of these mod tweaks. The other features such as config edits and textures where done by me and wesmontomato for the frost texture.
+
+---
