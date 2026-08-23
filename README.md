@@ -41,6 +41,14 @@ Add to bottom of your load order.
 
 ---
 
+# Uninstalling
+
+If you are mid playthrough, the safest way to uninstall is to completely lower your coldness level to 0 and use medical items to lower your fever level to 0. (You can chnage the effectiveness of medical items and ways of lowering your cold level in the MCM menu)
+
+Once done, save the game, exit out then you can safely remove the mod.
+
+---
+
 # Installing for future versions of GAMMA
 
 Choose either the regular or winter version, download the zip then install through MO2.
@@ -106,9 +114,11 @@ Instructions:
 ```
 
 7. Click save and you are done. Make sure Cold System - Redone is at the bottom of your load order.
+
+   *IF YOU REINSTALL DYNAHUD to change your visuals, you MUST repeat the steps above.
    
 
-If you use dynahud, which comes with visibility settings in it's MCM for the cold system ui, AND you are using Cold System Inventory UI, make sure to disable all the cold system features in Dynahud in MCM otherwise you will have crashes due to conflicts.
+If you use dynahud, which comes with visibility settings in it's MCM for the cold system ui, AND you are using the Cold System Inventory UI mod, make sure to disable all the cold system features in Dynahud in MCM otherwise you will have crashes due to conflicts.
 
 ---
 
