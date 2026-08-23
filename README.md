@@ -67,6 +67,8 @@ Then:
 	<cold_overlay x="0" y="0" width="1024" height="768" stretch="1" complex_mode="1">
 		<texture>ui\freezex\cold_overlay</texture>
 	</cold_overlay>
+
+	<!-- Rest of the Hud -->
 ```
 6. Click save and you are done. Make sure Cold System - Redone is at the bottom of your load order.
 ---
@@ -99,6 +101,8 @@ Instructions:
 	<cold_overlay x="0" y="0" width="1024" height="768" stretch="1" complex_mode="1">
 		<texture>ui\freezex\cold_overlay</texture>
 	</cold_overlay>
+
+	<!-- Rest of the Hud -->
 ```
 
 7. Click save and you are done. Make sure Cold System - Redone is at the bottom of your load order.
