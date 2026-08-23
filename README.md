@@ -124,7 +124,7 @@ If you use dynahud, which comes with visibility settings in it's MCM for the col
 
 # Original Mods Credits
 
-All credit goes to the original mod makers for Cold System and the Frosted Winter Mask Overlay mods. I simply tweaked the script, the UI, some configs and re-configured the overlay texture.
+All credit goes to the original mod makers for Cold System and the Frosted Winter Mask Overlay mods. I simply tweaked the existing scripts, created a new script, changed how the UI displays, tweaked some configs and re-configured the overlay texture.
 
 Original Cold System mod by bvcx, arti and RavenAscendant
 
@@ -134,8 +134,10 @@ Frosted Winter Mask Overlay mod by wesmontomato
 
 Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/fx
 
+---
+
 # Disclaimer
 
-I am not an expert coder in lua scripts. I used ChatGPT to help edit the scripts for the purposes of these mod tweaks. The other features such as config edits and textures where done by me and wesmontomato for the frost texture.
+I am not an expert coder in lua scripts. I used ChatGPT to help edit the scripts and write new scripts for the purposes of this mod. The other features such as config edits and textures where done by me and wesmontomato for the frost texture.
 
 ---
