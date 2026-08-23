@@ -118,7 +118,7 @@ Instructions:
    *IF YOU REINSTALL DYNAHUD to change your visuals, you MUST repeat the steps above.
    
 
-If you use dynahud, which comes with visibility settings in it's MCM for the cold system ui, AND you are using the Cold System Inventory UI mod, make sure to disable all the cold system features in Dynahud in MCM otherwise you will have crashes due to conflicts.
+If you use DynaHud, which comes with visibility settings in it's MCM for the cold system ui, AND you are using the Cold System Inventory UI mod, make sure to disable all the cold system features in the DynaHud MCM menu otherwise you will have crashes due to conflicts.
 
 ---
 
