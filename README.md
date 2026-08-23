@@ -4,11 +4,14 @@ An adaptation of the Cold System mod for Stalker. This was built to be used with
 
 If you are using DynaHud, I have provided installation instructions below.
 
-This version of the cold system tweaks the ui graphics, removes the coloured icons for items such as food and revamps the screen effects.
+This version of the cold system:
+- Tweaks the ui graphics.
+- Removes the coloured icons for items such as food.
+- Revamps the screen effects and it's implementation.*
 
-Instead of adding a tint to the entire screen as you cold meter increases, I wanted to have it so a texture slowly builds up.
+*Instead of adding a tint to the entire screen as you cold meter increases, I wanted to have it so a texture slowly builds up.
 
-This would also allow you to hide the UI of the cold system and use the on-screen effect as feedback.
+*This would also allow you to hide the UI of the cold system and use the on-screen effect as feedback.
 
 I HIGHLY recommend pairing this with the mod Cold System Inventory UI by Dedokpensioner and can be found here: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-inventory-ui
 
