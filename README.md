@@ -49,7 +49,7 @@ Then:
 
 1. Go into the mod 'G.A.M.M.A. Minimalist HUD' and copy the file 'ui_custom_msgs.xml' and paste into gamedata\configs\ui in the Cold System - Redone mod. This will overwrite the current 'ui_custom_msgs.xml'.
 2. Open the newly pasted 'ui_custom_msgs.xml' file.
-3. Add the code below to the very top of the xml file just below '<header>':
+3. Add the code below to the very top of the xml file just below where it says 'header':
    
 ```
 <cold_overlay x="0" y="0" width="1024" height="768" stretch="1" complex_mode="1">
@@ -83,7 +83,7 @@ Instructions:
 2. Open it, navigate to gamedata\configs\ui\ui_custom_msgs.xml.
 3. Copy the file 'ui_custom_msgs.xml' and paste into gamedata\configs\ui in the Cold System - Redone mod. This will overwrite the current 'ui_custom_msgs.xml'.
 4. Open the newly pasted 'ui_custom_msgs.xml' file.
-5. Add the code below to the very top of the xml file, below '<header>':
+5. Add the code below to the very top of the xml file, where it says 'header':
    
 ```
 <cold_overlay x="0" y="0" width="1024" height="768" stretch="1" complex_mode="1">
