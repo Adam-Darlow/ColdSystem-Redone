@@ -208,6 +208,7 @@ All credit goes to the original mod makers for **Cold System**, **Frosted Winter
 
 I have adapted the existing scripts, created new scripts, changed how the UI is displayed, modified configuration files, and reconfigured/updated the overlay textures.
 
+
 ## Cold System
 
 Original Cold System mod by **bvcx, arti and RavenAscendant**.
@@ -216,13 +217,15 @@ Mod link:
 
 https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
 
-## Frosted Winter Mask Overlay
+
+## Original Frosted Winter Mask Overlay (before I edited it)
 
 Frosted Winter Mask Overlay mod by **wesmontomato**.
 
 Mod link:
 
 https://www.moddb.com/mods/stalker-anomaly/addons/fx
+
 
 ## Cold System Inventory UI
 
