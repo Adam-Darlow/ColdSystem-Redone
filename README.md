@@ -192,6 +192,8 @@ Instructions:
 
 8. Save the file.
 
+>*If you REINSTALL **DynaHud** to change your visuals, you MUST repeat the steps above.
+
 # DynaHUD Cold System Compatibility
 
 DynaHUD includes visibility settings for the Cold System UI in its MCM.
