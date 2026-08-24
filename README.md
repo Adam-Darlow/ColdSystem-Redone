@@ -15,7 +15,7 @@ This version of the cold system:
 
 I have also included a patch file for players who wish to only display the cold HUD (overlay texture is separate) when opening their inventory. This is an adaption of the mod Cold System Inventory UI by Dedokpensioner. I have credited their work below.
 
-With the above mod, you can glance at your cold level when opening the inventory for a more descriptive version of your cold and fever level then rely on your on screen effect for a full hud-less experience.
+With the above patch, you can glance at your cold level when opening the inventory for a more descriptive version of your cold and fever level then rely on your on screen effect for a full hud-less experience.
 
 For a list of the rest of the features from Cold System, check out the original mod by bvcx: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
 
