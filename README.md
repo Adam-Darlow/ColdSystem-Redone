@@ -1,21 +1,21 @@
 # Cold System - Redone
 
-An adaptation of the Cold System mod for Stalker. This was built to be used with GAMMA 0.9.5. It is relatively straightforward to patch for future updates to GAMMA though.
+An adaptation of the Cold System mod for Stalker. This was built to be used with GAMMA 0.9.5. It is relatively straightforward to patch for future updates to GAMMA, though.
 
 If you are using DynaHud, I have provided installation instructions below.
 
 This version of the cold system:
-- Tweaks the ui graphics.
+- Tweaks the UI graphics.
 - Removes the coloured icons for items such as food.
-- Revamps the screen effects and it's implementation.*
+- Revamps the screen effects and its implementation.*
 
-*Instead of adding a tint to the entire screen as you cold meter increases, I wanted to have it so a texture slowly builds up.
+*Instead of adding a tint to the entire screen as your cold meter increases, I wanted to have it so a texture slowly builds up.
 
 *This would also allow you to hide the UI of the cold system and use the on-screen effect as feedback.
 
-I have also included a patch file for players who wish to only display the cold HUD (overlay texture is separate) when opening their inventory. This is an adaption of the mod Cold System Inventory UI by Dedokpensioner. I have credited their work below.
+I have also included a patch file for players who wish to only display the cold HUD (overlay texture is separate) when opening their inventory. This is an adaptation of the mod Cold System Inventory UI by Dedokpensioner. I have credited their work below.
 
-With the above patch, you can glance at your cold level when opening the inventory for a more descriptive version of your cold and fever level then rely on your on screen effect for a full hud-less experience.
+With the above patch, you can glance at your cold level when opening the inventory for a more descriptive version of your cold and fever level, then rely on your on-screen effect for a full HUD-less experience.
 
 For a list of the rest of the features from Cold System, check out the original mod by bvcx: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
 
@@ -25,10 +25,10 @@ For a list of the rest of the features from Cold System, check out the original 
 
 Two versions: Regular and Winter
 
-- Winter: The edges of the screen becomes a frosted texture that increases in opacity.
-- Regular: A blue-ish texture builds up around the screen edges which increases in opacity.
+- Regular: A blue-ish texture builds up around the screen edges, which increases in opacity.
+- Winter: The edges of the screen become a frosted texture that increases in opacity.
 
-The orignal version of the mod tinted your entire screen which affected your brightness. Both versions above aim to avoid this by changing only the edges of your screen and increase in intensity / opacity as you get colder. 
+The original version of the mod tinted your entire screen which affected your brightness. Both versions above aim to avoid this by changing only the edges of your screen and increase in intensity / opacity as you get colder. 
 
 ---
 
