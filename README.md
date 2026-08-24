@@ -13,7 +13,7 @@ This version of the cold system:
 
 *This would also allow you to hide the UI of the cold system and use the on-screen effect as feedback.
 
-I HIGHLY recommend pairing this with the mod Cold System Inventory UI by Dedokpensioner and can be found here: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-inventory-ui
+I have also included a patch file for players who wish to only display the cold HUD (overlay texture is separate) when opening their inventory. This is an adaption of the mod Cold System Inventory UI by Dedokpensioner. I have credited their work below.
 
 With the above mod, you can glance at your cold level when opening the inventory for a more descriptive version of your cold and fever level then rely on your on screen effect for a full hud-less experience.
 
@@ -41,6 +41,8 @@ Choose either the regular or winter version, download the zip then install throu
 Alternatively, download both, install with MO2 then enable one or the other if you play both regular versions or with winter overhauls like INVERNO.
 
 Add to bottom of your load order.
+
+*If using the Inventory patch, load the patch after Cold System - Redone.
 
 ---
 
@@ -127,20 +129,28 @@ If you use DynaHud, which comes with visibility settings in it's MCM for the col
 
 # Original Mods Credits
 
-All credit goes to the original mod makers for Cold System and the Frosted Winter Mask Overlay mods. I simply tweaked the existing scripts, created a new script, changed how the UI displays, tweaked some configs and re-configured the overlay texture.
+All credit goes to the original mod makers for Cold System, the Frosted Winter Mask Overlay and Cold System Inventory UI mods. I simply tweaked the existing scripts, created news script, changed how the UI displays, tweaked some configs and re-configured / updated the overlay textures.
 
 Original Cold System mod by bvcx, arti and RavenAscendant
 
 Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
 
+
 Frosted Winter Mask Overlay mod by wesmontomato
 
 Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/fx
+
+
+Cold System Inventory UI by Dedokpensioner (Do not download this for Cold System - Redone. Use the custom patch above.)*
+
+Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-inventory-ui
+
+*Even though you shouldn't use this mod for Cold System - Redone, I am still crediting for the original script 'cold_system_hud.script' supplied by Dedokpensioner. Without that, I wouldn't have been able to adapt the script for Cold System - Redone.
 
 ---
 
 # Disclaimer
 
-I am not an expert coder in lua scripts. I used ChatGPT to help write and edit the scripts for the purposes of this mod. The other features such as config edits and textures where done by me and wesmontomato for the frost texture.
+I am not an expert coder in lua scripts. I used ChatGPT to help write and edit the scripts for the purposes of this mod. The other features such as config edits and textures where done / edited by me.
 
 ---
