@@ -160,17 +160,11 @@ Instructions:
 
 1. Locate your **DynaHud** mod.
 
-2. Open it, navigate to:
-
-```gamedata\configs\ui\ui_custom_msgs.xml.```
+2. Open it, navigate to: `gamedata\configs\ui\ui_custom_msgs.xml.`
 
 3. Copy the file `ui_custom_msgs.xml`.
 
-4. Paste it into:
-
-```gamedata\configs\ui```
-
-inside the **Cold System** - Redone mod. This will overwrite the existing `ui_custom_msgs.xml`.
+4. Paste it into: `gamedata\configs\ui` inside the **Cold System** - Redone mod. This will overwrite the existing `ui_custom_msgs.xml`.
 
 5. Open the newly pasted `ui_custom_msgs.xml` file.
 
