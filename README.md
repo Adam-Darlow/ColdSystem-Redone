@@ -1,76 +1,136 @@
 # Cold System - Redone
 
-An adaptation of the Cold System mod for Stalker. This was built to be used with GAMMA 0.9.5. It is relatively straightforward to patch for future updates to GAMMA though.
+An adaptation and visual overhaul of the original **Cold System** mod for S.T.A.L.K.E.R. Anomaly / G.A.M.M.A.
 
-If you are using DynaHud, I have provided installation instructions below.
+This version was built and tested for **G.A.M.M.A. 0.9.5**. It should be relatively straightforward to patch for future G.A.M.M.A. updates if changes to the original Cold System or HUD files cause compatibility issues.
 
-This version of the cold system:
-- Tweaks the ui graphics.
-- Removes the coloured icons for items such as food.
-- Revamps the screen effects and it's implementation.*
+If you are using **DynaHUD**, please see the dedicated compatibility instructions below.
 
-*Instead of adding a tint to the entire screen as you cold meter increases, I wanted to have it so a texture slowly builds up.
+---
 
-*This would also allow you to hide the UI of the cold system and use the on-screen effect as feedback.
+# What Does Cold System - Redone Change?
 
-I have also included a patch file for players who wish to only display the cold HUD (overlay texture is separate) when opening their inventory. This is an adaption of the mod Cold System Inventory UI by Dedokpensioner. I have credited their work below.
+This version of Cold System focuses primarily on changing how the cold system is presented visually and how the player receives feedback from their cold level.
 
-With the above patch, you can glance at your cold level when opening the inventory for a more descriptive version of your cold and fever level then rely on your on screen effect for a full hud-less experience.
+### Changes include:
 
-For a list of the rest of the features from Cold System, check out the original mod by bvcx: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
+- Tweaked the UI graphics.
+- Removed the coloured icons for items such as food.
+- Reworked the screen effects and their implementation.
+- Replaced the original full-screen colour tint with a gradual screen-edge overlay.
+- Added separate **Regular** and **Winter** versions of the overlay.
+- Added an optional patch which allows the Cold System HUD to only appear when opening the player's inventory.
+
+The biggest change is the cold screen effect.
+
+Instead of gradually tinting the **entire screen** as the player's cold level increases, Cold System - Redone gradually builds an overlay texture around the **edges of the screen**.
+
+This allows the effect to become increasingly noticeable without significantly affecting the overall brightness or colour of the game world.
+
+It also makes it possible to hide the Cold System HUD completely and use the screen effect itself as the primary visual feedback for your cold level.
+
+---
+
+# Inventory HUD
+
+I have also included an optional patch which allows the Cold System HUD to only appear when the player opens their inventory.
+
+The overlay effect remains completely separate from the HUD and can be enabled or disabled independently.
+
+This patch is an adaptation of **Cold System Inventory UI by Dedokpensioner**, with the script modified to work with Cold System - Redone.
+
+With the patch installed, you can open your inventory to get a more detailed view of your current cold and fever levels, then close the inventory and rely entirely on the screen effect.
+
+This allows for a more immersive, HUD-less experience without removing access to the Cold System information when you need it.
 
 ---
 
 # Versions
 
-Two versions: Regular and Winter
+Cold System - Redone is available in two versions:
 
-- Winter: The edges of the screen becomes a frosted texture that increases in opacity.
-- Regular: A blue-ish texture builds up around the screen edges which increases in opacity.
+### Regular
 
-The orignal version of the mod tinted your entire screen which affected your brightness. Both versions above aim to avoid this by changing only the edges of your screen and increase in intensity / opacity as you get colder. 
+A blue-ish texture gradually builds up around the edges of the screen as your cold level increases.
+
+### Winter
+
+A frosted texture gradually builds up around the edges of the screen as your cold level increases.
+
+The **Winter** version is intended to work particularly well with snowy/winter overhauls such as **INVERNO**.
+
+The original Cold System effect tinted the entire screen which affected the brightness of the game. Both versions of Cold System - Redone aim to avoid this by changing only the edges of the screen and increasing in intensity/opacity as you get colder.
 
 ---
 
 # Installation
 
-*REQUIRES enabling G.A.M.M.A. Minimalist HUD (should be on by default in GAMMA)
+> **REQUIRES G.A.M.M.A. Minimalist HUD to be enabled.**
+>
+> Minimalist HUD should be enabled by default in G.A.M.M.A.
 
-Choose either the regular or winter version, download the zip then install through MO2.
+Choose either the **Regular** or **Winter** version, download the ZIP and install it through **Mod Organizer 2 (MO2)**.
 
-Alternatively, download both, install with MO2 then enable one or the other if you play both regular versions or with winter overhauls like INVERNO.
+After installation:
 
-Add to bottom of your load order.
+1. Make sure **G.A.M.M.A. Minimalist HUD** is enabled.
+2. Place **Cold System - Redone** at the **bottom of your load order**.
+3. Launch the game and configure the Cold System settings through the MCM.
 
-*If using the Inventory patch, load the patch after Cold System - Redone.
+### Using both versions
+
+If you play both regular and winter setups, you can install both versions through MO2 and enable only the version you currently want to use.
+
+For example:
+
+- **Regular** for a standard G.A.M.M.A. setup.
+- **Winter** for a winter overhaul such as INVERNO.
+
+> **Inventory Patch:** If you are using the Inventory HUD patch, load the patch **after Cold System - Redone**.
 
 ---
 
 # Uninstalling
 
-If you are mid playthrough, the safest way to uninstall is to completely lower your coldness level to 0 and use medical items to lower your fever level to 0. (You can chnage the effectiveness of medical items and ways of lowering your cold level in the MCM menu)
+If you are currently in the middle of a playthrough, the safest way to uninstall Cold System - Redone is to completely remove your current cold and fever effects first.
 
-Once done, save the game, exit out then you can safely remove the mod.
+Before uninstalling:
+
+1. Lower your cold level to **0**.
+2. Lower your fever level to **0** using the available medical treatments.
+3. Save the game.
+4. Exit the game completely.
+5. Remove Cold System - Redone from MO2.
+
+The effectiveness of medical items and the ways of lowering your cold and fever levels can be changed through the Cold System MCM.
 
 ---
 
-# Installing for future versions of GAMMA
+# Installing for Future Versions of G.A.M.M.A.
 
-Choose either the regular or winter version, download the zip then install through MO2.
+Cold System - Redone was built and tested with G.A.M.M.A. 0.9.5. Future versions of G.A.M.M.A. may change the `ui_custom_msgs.xml` file used by G.A.M.M.A. Minimalist HUD.
+
+If this happens, you can manually reapply the Cold System - Redone HUD changes.
+
+Choose either the **Regular** or **Winter** version, download the ZIP, then install it through MO2.
 
 Then:
 
-1. Go into the mod 'G.A.M.M.A. Minimalist HUD' and copy the file 'ui_custom_msgs.xml' and paste into gamedata\configs\ui in the Cold System - Redone mod. This will overwrite the current 'ui_custom_msgs.xml'.
-2. Open the newly pasted 'ui_custom_msgs.xml' file.
-3. Add the code below to the very top of the xml file, just underneath where it says 'header':
-   
+1. Go into the **G.A.M.M.A. Minimalist HUD** mod and copy the file `ui_custom_msgs.xml`.
+
+2. Paste it into `gamedata\configs\ui` inside the **Cold System - Redone** mod. This will overwrite the existing `ui_custom_msgs.xml`.
+
+3. Open the newly pasted `ui_custom_msgs.xml` file.
+
+4. Add the following code to the very top of the XML file, immediately underneath `<header>`:
+
 ```
 <cold_overlay x="0" y="0" width="1024" height="768" stretch="1" complex_mode="1">
     <texture>ui\freezex\cold_overlay</texture>
 </cold_overlay>
 ```
 
-4. It should now look like this:
+5. It should now look like this:
    
 ```
 <header>
@@ -83,29 +143,41 @@ Then:
 
 	<!-- Rest of the Hud -->
 ```
-6. Click save and you are done. Make sure Cold System - Redone is at the bottom of your load order.
+
+6. Save the file.
+
+You are now finished. Make sure **Cold System - Redone** is at the bottom of your load order.
+
 ---
 
 # Compatibility with DynaHud
 
-DynaHUD may modify the ui_custom_msgs.xml file depending on your installation / configuration. If you use DynaHUD, install DynaHud with your custom settings then follow the manual patch instructions below rather than allowing Cold System - Redone to overwrite your existing ui_custom_msgs.xml file.
+DynaHUD may modify the `ui_custom_msgs.xml` file depending on your installation and configuration.
+
+If you use DynaHUD, install and configure DynaHUD with your preferred settings first. Then follow the manual patch instructions below rather than allowing Cold System - Redone to overwrite your existing `ui_custom_msgs.xml`.
 
 Instructions:
 
-1. Locate your DynaHud mod.
-2. Open it, navigate to gamedata\configs\ui\ui_custom_msgs.xml.
-3. Copy the file 'ui_custom_msgs.xml' and paste into gamedata\configs\ui in the Cold System - Redone mod. This will overwrite the current 'ui_custom_msgs.xml'.
-4. Open the newly pasted 'ui_custom_msgs.xml' file.
-5. Add the code below to the very top of the xml file, just underneath where it says 'header':
-   
+1. Locate your **DynaHud** mod.
+
+2. Open it, navigate to: `gamedata\configs\ui\ui_custom_msgs.xml.`
+
+3. Copy the file `ui_custom_msgs.xml`.
+
+4. Paste it into: `gamedata\configs\ui` inside the **Cold System** - Redone mod. This will overwrite the existing `ui_custom_msgs.xml`.
+
+5. Open the newly pasted `ui_custom_msgs.xml` file.
+
+6. Add the following code to the very top of the XML file, immediately underneath `<header>`:
+
 ```
 <cold_overlay x="0" y="0" width="1024" height="768" stretch="1" complex_mode="1">
     <texture>ui\freezex\cold_overlay</texture>
 </cold_overlay>
 ```
 
-6. It should now look like this:
-   
+7. It should now look like this:
+
 ```
 <header>
 
@@ -118,39 +190,58 @@ Instructions:
 	<!-- Rest of the Hud -->
 ```
 
-7. Click save and you are done. Make sure Cold System - Redone is at the bottom of your load order.
+8. Save the file.
 
-   *IF YOU REINSTALL DYNAHUD to change your visuals, you MUST repeat the steps above.
-   
+# DynaHUD Cold System Compatibility
 
-If you use DynaHud, which comes with visibility settings in it's MCM for the cold system ui, AND you are using the Cold System Inventory UI mod, make sure to disable all the cold system features in the DynaHud MCM menu otherwise you will have crashes due to conflicts.
+DynaHUD includes visibility settings for the Cold System UI in its MCM.
+
+If you are using both **DynaHUD** and the **Cold System Inventory UI patch**, make sure to disable all Cold System features in the DynaHUD MCM menu.
+
+Otherwise, the two mods may conflict and cause crashes.
 
 ---
 
 # Original Mods Credits
 
-All credit goes to the original mod makers for Cold System, the Frosted Winter Mask Overlay and Cold System Inventory UI mods. I simply tweaked the existing scripts, created news script, changed how the UI displays, tweaked some configs and re-configured / updated the overlay textures.
+All credit goes to the original mod makers for **Cold System**, **Frosted Winter Mask Overlay**, and **Cold System Inventory UI**.
 
-Original Cold System mod by bvcx, arti and RavenAscendant
+I have adapted the existing scripts, created new scripts, changed how the UI is displayed, modified configuration files, and reconfigured/updated the overlay textures.
 
-Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
+## Cold System
 
+Original Cold System mod by **bvcx, arti and RavenAscendant**.
 
-Frosted Winter Mask Overlay mod by wesmontomato
+Mod link:
 
-Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/fx
+https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-01
 
+## Frosted Winter Mask Overlay
 
-Cold System Inventory UI by Dedokpensioner (Do not download this for Cold System - Redone. Use the custom patch above.)*
+Frosted Winter Mask Overlay mod by **wesmontomato**.
 
-Mod link: https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-inventory-ui
+Mod link:
 
-*Even though you shouldn't use this mod for Cold System - Redone, I am still crediting for the original script 'cold_system_hud.script' supplied by Dedokpensioner. Without that, I wouldn't have been able to adapt the script for Cold System - Redone.
+https://www.moddb.com/mods/stalker-anomaly/addons/fx
+
+## Cold System Inventory UI
+
+Cold System Inventory UI by **Dedokpensioner**.
+
+**Do not download this mod for Cold System - Redone. Use the custom patch provided with Cold System - Redone instead.**
+
+Mod link:
+
+https://www.moddb.com/mods/stalker-anomaly/addons/cold-system-inventory-ui
+
+Even though you should not use this mod alongside Cold System - Redone, I am still crediting Dedokpensioner for the original `cold_system_hud.script` supplied with their mod.
+
+Without that script, I would not have been able to adapt the inventory-only HUD functionality for Cold System - Redone.
 
 ---
 
 # Disclaimer
 
-I am not an expert coder in lua scripts. I used ChatGPT to help write and edit the scripts for the purposes of this mod. The other features such as config edits and textures where done / edited by me.
+I am not an expert Lua developer. I used ChatGPT to help write and edit the Lua scripts for the purposes of this mod.
 
----
+The other aspects of the mod, including the configuration edits, UI changes, and texture editing/reconfiguration, were done by me.
