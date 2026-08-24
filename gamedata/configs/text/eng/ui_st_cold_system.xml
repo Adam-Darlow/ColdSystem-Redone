@@ -95,7 +95,7 @@
 	</string>
 
 	<string id="ui_mcm_cold_system_hud">
-		<text>Show HUD always</text>
+		<text>Show HUD</text>
 	</string>
 
 	<string id="ui_mcm_cold_system_keybind">
@@ -110,14 +110,14 @@
 		<text>Cold position X</text>
 	</string>
 	<string id="ui_mcm_cold_system_main_hud_position_x_desc">
-		<text>Default: 940</text>
+		<text>Default: 20</text>
 	</string>
 
 	<string id="ui_mcm_cold_system_main_hud_position_y">
 		<text>Cold position Y</text>
 	</string>
 	<string id="ui_mcm_cold_system_main_hud_position_y_desc">
-		<text>Default: 190</text>
+		<text>Default: 5</text>
 	</string>
 
 	<string id="ui_mcm_cold_system_main_bar_text_mode">
@@ -140,14 +140,14 @@
 		<text>Thermometer position X</text>
 	</string>
 	<string id="ui_mcm_cold_system_thermo_hud_position_x_desc">
-		<text>Default: 990</text>
+		<text>Default: 5</text>
 	</string>
 
 	<string id="ui_mcm_cold_system_thermo_hud_position_y">
 		<text>Thermometer position Y</text>
 	</string>
 	<string id="ui_mcm_cold_system_thermo_hud_position_y_desc">
-		<text>Default: 50</text>
+		<text>Default: 5</text>
 	</string>
 
 	<string id="ui_mcm_cold_system_thermo_bar_text_mode">
@@ -214,7 +214,7 @@
 		<text>Screen Effect</text>
 	</string>
 	<string id="ui_mcm_cold_system_ppe_desc">
-		<text>Enable/disable screen becoming more white-ish, depends on cold level.</text>
+		<text>Enable/disable screen texture becoming more opaque, depends on cold level.</text>
 	</string>
 
 	<string id="ui_mcm_cold_system_debugx">
