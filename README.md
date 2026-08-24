@@ -146,7 +146,8 @@ Then:
 
 6. Save the file.
 
-You are now finished. Make sure Cold System - Redone is at the bottom of your load order.
+You are now finished. Make sure **Cold System - Redone** is at the bottom of your load order.
+
 ---
 
 # Compatibility with DynaHud
