@@ -1,0 +1,179 @@
+local cmain = cold_system
+local cutils = cold_system_utils
+
+HUD = nil
+
+function activate_hud(gui)
+	if gui ~= "UIInventory" then
+		return
+	end
+
+	if not cold_system_mcm.get_config("hud") then
+		return
+	end
+
+	if not (ui_inventory and ui_inventory.GUI) then
+		return
+	end
+
+	if not db.actor:has_info("inventory_wnd_open") then
+		return
+	end
+
+	if HUD == nil then
+		HUD = ColdSystemHUD()
+		get_hud():AddDialogToRender(HUD)
+		HUD:Refresh()
+	end
+end
+
+function deactivate_hud()
+	if HUD ~= nil then
+		get_hud():RemoveDialogToRender(HUD)
+		HUD = nil
+	end
+end
+
+class "ColdSystemHUD" (CUIScriptWnd)
+
+function ColdSystemHUD:__init() super()
+	self:InitControls()
+end
+
+function ColdSystemHUD:InitControls()
+	self:SetWndRect(Frect():set(0, 0, 1024, 768))
+	self:SetAutoDelete(true)
+
+	self.xml = CScriptXmlInit()
+	local xml = self.xml
+	xml:ParseFile("ui_freeze.xml")
+
+	self.tmr = 0
+
+	-- cold and sick bars
+	self.cold_bg = xml:InitStatic("cold_bg", self)
+	self.cold_frame = xml:InitStatic("cold_bg:cold_frame", self.cold_bg)
+	self.cold_bar = xml:InitProgressBar("cold_bg:cold_frame:cold_bar", self.cold_frame)
+	self.sick_frame = xml:InitStatic("cold_bg:sick_frame", self.cold_bg)
+	self.sick_bar = xml:InitProgressBar("cold_bg:sick_frame:sick_bar", self.sick_frame)
+
+	-- sick and damage thresholds
+	local frame_w = self.cold_frame:GetWidth()
+	self.sick_threshold = xml:InitStatic("cold_bg:sick_threshold", self.cold_frame)
+	self.sick_threshold:SetWndPos(vector2():set(frame_w*0.3, 1))
+	self.damage_threshold = xml:InitStatic("cold_bg:damage_threshold", self.cold_frame)
+	self.damage_threshold:SetWndPos(vector2():set(frame_w*0.9, 1))
+
+	-- thermometer
+	self.thermo_bg = xml:InitStatic("thermo_bg", self)
+	self.thermo_bar_blue = xml:InitProgressBar("thermo_bg:blue_bar", self.thermo_bg)
+	self.thermo_bar_red = xml:InitProgressBar("thermo_bg:red_bar", self.thermo_bg)
+	self.thermo_resist = xml:InitStatic("thermo_bg:resist", self.thermo_bg)
+
+	self.blue_bar_h = self.thermo_bar_blue:GetHeight() - 3
+	self.blue_bar_y = self.thermo_bar_blue:GetWndPos().y
+
+	-- texts
+	self.cold_text = xml:InitStatic("cold_text", self)
+	self.thermo_text = xml:InitStatic("thermo_text", self)
+end
+
+function ColdSystemHUD:Update()
+	CUIScriptWnd.Update(self)
+
+	local tg = time_global()
+	if self.tmr > tg then return end
+	self.tmr = tg + 250
+
+	self:ColdUpdate()
+	self:ThermoUpdate()
+
+	self:ShowToggle()
+end
+
+function ColdSystemHUD:ColdUpdate()
+	if cold_system_mcm.get_config("main_bar_text_mode") then
+		self.cold_text:TextControl():SetText(cutils.get_hud_cold_str())
+		return
+	end
+
+	-- cold bar
+	local cold_val = cmain.cold.val / cmain.max_cold
+	self.cold_bar:SetProgressPos(cold_val)
+
+	-- sick bar
+	self.sick_bar:SetProgressPos(cmain.cold.sickness)
+end
+
+function ColdSystemHUD:ThermoUpdate()
+	if cold_system_mcm.get_config("thermo_bar_text_mode") then
+		self.thermo_text:TextControl():SetText(cutils.get_hud_thermo_str())
+		return
+	end
+
+	-- thermometer
+	self.thermo_bar_blue:SetProgressPos(cmain.hud_env_temp_blue)
+	self.thermo_bar_red:SetProgressPos(cmain.hud_env_temp_red)
+
+	local thermo_resist_x = self.thermo_resist:GetWndPos().x
+	local thermo_resist_y = clamp(self.blue_bar_y + cmain.hud_prot_temp_offset * self.blue_bar_h, 0, self.blue_bar_h)
+	self.thermo_resist:SetWndPos(vector2():set(thermo_resist_x, thermo_resist_y))
+end
+
+function ColdSystemHUD:Refresh()
+	local cold_pos_x = cold_system_mcm.get_config("main_hud_position_x")
+	local cold_pos_y = cold_system_mcm.get_config("main_hud_position_y")
+	self.cold_bg:SetWndPos(vector2():set(cold_pos_x, cold_pos_y))
+	self.cold_text:SetWndPos(vector2():set(cold_pos_x, cold_pos_y))
+	self.cold_text:TextControl():SetFont(cutils.get_hud_cold_font())
+
+	local thermo_pos_x = cold_system_mcm.get_config("thermo_hud_position_x")
+	local thermo_pos_y = cold_system_mcm.get_config("thermo_hud_position_y")
+	self.thermo_bg:SetWndPos(vector2():set(thermo_pos_x, thermo_pos_y))
+	self.thermo_text:SetWndPos(vector2():set(thermo_pos_x, thermo_pos_y))
+	self.thermo_text:TextControl():SetFont(cutils.get_hud_thermo_font())
+end
+
+function ColdSystemHUD:HideAll()
+	self.cold_bg:Show(false)
+	self.cold_text:Show(false)
+	self.thermo_bg:Show(false)
+	self.thermo_text:Show(false)
+end
+
+function ColdSystemHUD:ShowToggle()
+	local mcm_cold_text = cold_system_mcm.get_config("main_bar_text_mode")
+	self.cold_bg:Show(not mcm_cold_text)
+	self.cold_text:Show(mcm_cold_text)
+
+	local mcm_thermo_text = cold_system_mcm.get_config("thermo_bar_text_mode")
+	self.thermo_bg:Show(not mcm_thermo_text)
+	self.thermo_text:Show(mcm_thermo_text)
+end
+
+function ColdSystemHUD:__finalize()
+end
+
+local update_tmr = 0
+
+function actor_on_update()
+	local tg = time_global()
+
+	if update_tmr > tg then
+		return
+	end
+
+	update_tmr = tg + 250
+
+	if HUD ~= nil and not db.actor:has_info("inventory_wnd_open") then
+		deactivate_hud()
+	end
+end
+
+function on_game_start()
+	RegisterScriptCallback("GUI_on_show", activate_hud)
+	RegisterScriptCallback("GUI_on_hide", deactivate_hud)
+	RegisterScriptCallback("actor_on_update", actor_on_update)
+	RegisterScriptCallback("actor_on_net_destroy", deactivate_hud)
+	RegisterScriptCallback("actor_on_before_death", deactivate_hud)
+end
